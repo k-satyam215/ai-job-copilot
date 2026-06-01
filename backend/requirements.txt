@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+python-dotenv
+python-multipart
+SQLAlchemy
+pydantic
+email-validator
+python-jose[cryptography]
+PyMuPDF
+httpx
+playwright
+psycopg[binary]
+alembic

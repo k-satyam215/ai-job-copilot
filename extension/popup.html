@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>AI Job Copilot</title>
+  <style>
+    body {
+      width: 320px;
+      margin: 0;
+      padding: 16px;
+      font-family: Inter, Arial, sans-serif;
+      color: #eef2ff;
+      background: #0b1020;
+    }
+    h2 { margin: 0 0 10px; font-size: 18px; }
+    p { color: #94a3b8; font-size: 12px; line-height: 1.4; }
+    input {
+      width: 100%;
+      box-sizing: border-box;
+      margin: 8px 0;
+      padding: 10px;
+      border: 1px solid #26314f;
+      border-radius: 8px;
+      color: #eef2ff;
+      background: #111827;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      border: 0;
+      border-radius: 8px;
+      color: #07111f;
+      font-weight: 700;
+      background: #38bdf8;
+      cursor: pointer;
+    }
+    #status { min-height: 18px; margin-top: 10px; color: #a7f3d0; }
+  </style>
+</head>
+<body>
+  <h2>AI Job Copilot</h2>
+  <p>Paste backend JWT token from login response. The content script uses it to match and track applications.</p>
+  <input id="token" placeholder="Bearer token" />
+  <button id="save">Save Token</button>
+  <div id="status"></div>
+  <script src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+body {
+  margin: 0;
+  color: #eef2ff;
+  background: #0b1020;
+  font-family: Inter, Arial, sans-serif;
+}
+
+.sidebar {
+  width: 320px;
+  padding: 16px;
+}
+
+h1 {
+  margin: 0 0 12px;
+  font-size: 20px;
+}
+
+p, pre {
+  color: #94a3b8;
+  white-space: pre-wrap;
+}
+
+button {
+  width: 100%;
+  margin: 8px 0;
+  padding: 10px;
+  border: 0;
+  border-radius: 8px;
+  background: #38bdf8;
+  color: #07111f;
+  font-weight: 800;
+  cursor: pointer;
+}
