@@ -4,6 +4,7 @@
 
 - Groq API key.
 - Stripe account with products/prices/webhooks.
+- Razorpay account with key id, key secret, and webhook secret if using Razorpay.
 - Production Postgres database.
 - Redis instance.
 - Email SMTP provider.
@@ -18,6 +19,8 @@
 - Set `DATABASE_URL` to Postgres.
 - Set `GROQ_API_KEY`.
 - Set Stripe webhook secret and checkout price IDs after adding the real Stripe integration.
+- Set `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, and `RAZORPAY_WEBHOOK_SECRET` when using Razorpay.
+- Set `WHATSAPP_ACCESS_TOKEN` and `WHATSAPP_PHONE_NUMBER_ID` for WhatsApp Cloud API notifications.
 - Configure `FRONTEND_ORIGIN` to the production frontend URL.
 - Configure SMTP variables for email notifications.
 

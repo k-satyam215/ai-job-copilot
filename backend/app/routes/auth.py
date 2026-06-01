@@ -32,6 +32,8 @@ class PreferencesRequest(BaseModel):
     linkedin: str | None = None
     portfolio: str | None = None
     work_authorization: str | None = None
+    telegram_chat_id: str | None = None
+    whatsapp_phone: str | None = None
 
 
 def public_user(user: User) -> dict:

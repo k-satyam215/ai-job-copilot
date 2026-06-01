@@ -10,6 +10,7 @@ export default function DashboardPage() {
   const [jobs, setJobs] = useState<any[]>([]);
   const [apps, setApps] = useState<any[]>([]);
   const [profile, setProfile] = useState<any>(null);
+  const [discovering, setDiscovering] = useState(false);
 
   useEffect(() => {
     api.get("/resume/profile").then((res) => setProfile(res.data.profile)).catch(() => {});
@@ -19,11 +20,38 @@ export default function DashboardPage() {
 
   const highMatches = jobs.filter((job) => (job.match?.match_score || 0) >= 70).length;
 
+  async function discoverJobs() {
+    setDiscovering(true);
+    try {
+      const res = await api.post("/jobs/discover", { pages: 1 });
+      setJobs(res.data.jobs.map((row: any) => ({
+        id: row.id,
+        title: row.title,
+        company: row.company,
+        source: row.source,
+        url: row.url,
+        skills: [],
+        match: row.match,
+      })));
+    } finally {
+      setDiscovering(false);
+    }
+  }
+
   return (
     <div className="shell">
       <Sidebar />
       <main className="main">
         <Navbar title="Dashboard" />
+        <section className="panel" style={{ marginBottom: 16 }}>
+          <div className="row" style={{ justifyContent: "space-between" }}>
+            <div>
+              <h2 style={{ margin: 0 }}>Live Job Discovery</h2>
+              <p className="muted">Fetch fresh matching jobs from Naukri, LinkedIn, Foundit, Indeed, Unstop, and Apna.</p>
+            </div>
+            <button className="button" onClick={discoverJobs} disabled={discovering}>{discovering ? "Searching..." : "Find Fresh Jobs"}</button>
+          </div>
+        </section>
         <section className="grid">
           <div className="panel"><div className="metric">{jobs.length}</div><div className="muted">Jobs captured</div></div>
           <div className="panel"><div className="metric">{highMatches}</div><div className="muted">High matches</div></div>

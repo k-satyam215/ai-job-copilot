@@ -14,9 +14,9 @@ from sqlalchemy.orm import Session
 from app.database import SessionLocal
 from app.models.job import Job
 from app.models.user import User
-from app.scrapers.naukri import fetch_naukri_jobs
 from app.services.deduplicator import upsert_job
-from app.services.matcher import match_job
+from app.services.job_aggregator import fetch_jobs_from_all_sources
+from app.services.vector_matcher import hybrid_match
 from app.services.notifier import notify_new_job
 
 logger = logging.getLogger(__name__)
@@ -28,9 +28,11 @@ HIGH_MATCH_THRESHOLD  = 70
 async def _process_jobs_for_users(db: Session, new_jobs: list[dict]) -> None:
     users: list[User] = db.query(User).filter(User.profile_json.isnot(None)).all()
     for user in users:
-        telegram_id: str | None = (user.preferences_json or {}).get("telegram_chat_id")
+        preferences = user.preferences_json or {}
+        telegram_id: str | None = preferences.get("telegram_chat_id")
+        whatsapp_phone: str | None = preferences.get("whatsapp_phone")
         for job_data in new_jobs:
-            result = match_job(job_data, user.profile_json or {})
+            result = hybrid_match(job_data, user.profile_json or {})
             score  = result["match_score"]
             if score >= HIGH_MATCH_THRESHOLD:
                 await notify_new_job(
@@ -39,6 +41,7 @@ async def _process_jobs_for_users(db: Session, new_jobs: list[dict]) -> None:
                     telegram_id = telegram_id,
                     job         = job_data,
                     score       = score,
+                    whatsapp_phone = whatsapp_phone,
                 )
 
 
@@ -57,7 +60,7 @@ async def _poll_once() -> None:
 
         new_jobs: list[dict] = []
         for kw in list(keywords)[:5]:   # cap at 5 keywords per cycle
-            fetched = await fetch_naukri_jobs(keyword=kw, pages=2)
+            fetched = await fetch_jobs_from_all_sources(keyword=kw, pages=1)
             for job_data in fetched:
                 _, created = upsert_job(db, job_data)
                 if created:

@@ -16,7 +16,9 @@ export default function ResumePage() {
     relocation: "Yes",
     linkedin: "",
     portfolio: "",
-    work_authorization: "Yes"
+    work_authorization: "Yes",
+    telegram_chat_id: "",
+    whatsapp_phone: ""
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -84,6 +86,8 @@ export default function ResumePage() {
           <input className="input" placeholder="Relocation Preference" value={preferences.relocation || ""} onChange={(e) => setPreferences({ ...preferences, relocation: e.target.value })} />
           <input className="input" placeholder="LinkedIn URL" value={preferences.linkedin || ""} onChange={(e) => setPreferences({ ...preferences, linkedin: e.target.value })} />
           <input className="input" placeholder="Portfolio/GitHub URL" value={preferences.portfolio || ""} onChange={(e) => setPreferences({ ...preferences, portfolio: e.target.value })} />
+          <input className="input" placeholder="Telegram Chat ID" value={preferences.telegram_chat_id || ""} onChange={(e) => setPreferences({ ...preferences, telegram_chat_id: e.target.value })} />
+          <input className="input" placeholder="WhatsApp Phone with country code" value={preferences.whatsapp_phone || ""} onChange={(e) => setPreferences({ ...preferences, whatsapp_phone: e.target.value })} />
           <button className="button" onClick={savePreferences}>Save Copilot Memory</button>
         </section>
       </main>

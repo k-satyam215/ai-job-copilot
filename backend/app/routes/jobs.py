@@ -6,7 +6,10 @@ from app.database import get_db
 from app.models.job import Job
 from app.models.user import User
 from app.services.deduplicator import upsert_job
+from app.services.cover_letter_optimizer import generate_cover_letter
+from app.services.job_aggregator import fetch_jobs_from_all_sources
 from app.services.job_parser import parse_job
+from app.services.resume_tailor import tailor_resume
 from app.services.vector_matcher import hybrid_match
 from app.utils.security import get_current_user
 
@@ -24,6 +27,11 @@ class JobPayload(BaseModel):
     url: str | None = None
     description: str | None = None
     skills: list[str] = []
+
+
+class DiscoverPayload(BaseModel):
+    keyword: str | None = None
+    pages: int = 1
 
 
 @router.post("/match")
@@ -63,3 +71,40 @@ def list_jobs(db: Session = Depends(get_db), user: User = Depends(get_current_us
         }
         for job in jobs
     ]
+
+
+@router.post("/discover")
+async def discover(payload: DiscoverPayload, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    profile = user.profile_json or {}
+    keyword = payload.keyword or next(iter(profile.get("job_roles", []) or profile.get("skills", []) or ["software engineer"]))
+    fetched = await fetch_jobs_from_all_sources(str(keyword), pages=max(1, min(payload.pages, 2)))
+    saved = []
+    for item in fetched:
+        job, created = upsert_job(db, item)
+        match = hybrid_match(item, profile)
+        saved.append({
+            "id": job.id,
+            "created": created,
+            "title": job.title,
+            "company": job.company,
+            "source": job.source,
+            "url": job.url,
+            "match": match,
+        })
+    return {"keyword": keyword, "count": len(saved), "jobs": sorted(saved, key=lambda row: row["match"]["match_score"], reverse=True)}
+
+
+@router.post("/apply-kit")
+def apply_kit(payload: JobPayload, user: User = Depends(get_current_user)):
+    job = payload.model_dump()
+    profile = user.profile_json or {}
+    tailoring = tailor_resume(user.resume_text or "", job, profile)
+    cover_letter = generate_cover_letter(job, profile)
+    match = hybrid_match(job, profile)
+    return {
+        "job": job,
+        "match": match,
+        "tailored_resume": tailoring,
+        "cover_letter": cover_letter,
+        "apply_mode": "AI fills and prepares; user reviews and clicks final Apply",
+    }
