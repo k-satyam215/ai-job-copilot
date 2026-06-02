@@ -17,6 +17,7 @@
 
 - Set `JWT_SECRET` to a long random value.
 - Set `DATABASE_URL` to Postgres.
+- Render/Postgres URLs using `postgres://`, `postgresql://`, or `postgresql+psycopg2://` are normalized by the backend to `postgresql+psycopg://`.
 - Set `GROQ_API_KEY`.
 - Set Stripe webhook secret and checkout price IDs after adding the real Stripe integration.
 - Set `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, and `RAZORPAY_WEBHOOK_SECRET` when using Razorpay.

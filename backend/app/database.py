@@ -5,9 +5,28 @@ from app.config import get_settings
 
 
 settings = get_settings()
-connect_args = {"check_same_thread": False} if settings.database_url.startswith("sqlite") else {}
 
-engine = create_engine(settings.database_url, connect_args=connect_args)
+
+def normalize_database_url(database_url: str) -> str:
+    """Normalize hosted Postgres URLs to the psycopg v3 SQLAlchemy dialect.
+
+    Render and other providers may expose either `postgres://` or
+    `postgresql+psycopg2://`. This project installs `psycopg[binary]`, so the
+    SQLAlchemy URL must use `postgresql+psycopg://`.
+    """
+    if database_url.startswith("postgres://"):
+        return database_url.replace("postgres://", "postgresql+psycopg://", 1)
+    if database_url.startswith("postgresql+psycopg2://"):
+        return database_url.replace("postgresql+psycopg2://", "postgresql+psycopg://", 1)
+    if database_url.startswith("postgresql://"):
+        return database_url.replace("postgresql://", "postgresql+psycopg://", 1)
+    return database_url
+
+
+database_url = normalize_database_url(settings.database_url)
+connect_args = {"check_same_thread": False} if database_url.startswith("sqlite") else {}
+
+engine = create_engine(database_url, connect_args=connect_args)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
