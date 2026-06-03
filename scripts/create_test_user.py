@@ -17,8 +17,27 @@ from dotenv import load_dotenv
 load_dotenv(os.path.join(os.path.dirname(__file__), "..", "backend", ".env"))
 
 from app.database import SessionLocal, Base, engine
+from app.models import application, job, user  # noqa — registers all models
 from app.models.user import User
 from app.utils.security import hash_password
+
+# Run missing column migrations first
+from sqlalchemy import text
+with engine.connect() as conn:
+    migrations = [
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS is_verified BOOLEAN NOT NULL DEFAULT FALSE",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS verification_token VARCHAR(128)",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS verified_at TIMESTAMP",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_token VARCHAR(128)",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_token_expires_at TIMESTAMP",
+    ]
+    for sql in migrations:
+        try:
+            conn.execute(text(sql))
+        except Exception as e:
+            print(f"  (skipped: {e}")
+    conn.commit()
+    print("✓ Database columns verified")
 
 Base.metadata.create_all(bind=engine)
 
