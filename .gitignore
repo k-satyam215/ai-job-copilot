@@ -15,7 +15,9 @@ uploads/
 frontend/.next/
 frontend/node_modules/
 outputs/
+
+# Environment files - keep .env.production but ignore secrets
 .env
 backend/.env
 frontend/.env
-*.env
+frontend/.env.local
