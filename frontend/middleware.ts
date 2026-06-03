@@ -7,6 +7,10 @@ const PUBLIC_PATHS = [
   "/verify-email",
   "/reset-password",
   "/forgot-password",
+  "/pricing",
+  "/terms",
+  "/privacy",
+  "/refund",
 ];
 
 export function middleware(request: NextRequest) {

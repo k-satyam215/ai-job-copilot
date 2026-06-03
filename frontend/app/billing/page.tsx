@@ -55,8 +55,8 @@ export default function BillingPage() {
         amount: order.amount,
         currency: order.currency || "INR",
         name: "AI Job Copilot",
-        description: `${planName} Plan`,
-        order_id: order.razorpay_order_id || order.id,
+        description: `${planName} Plan — Career Productivity SaaS`,
+        order_id: order.id || order.razorpay_order_id || "",
         handler: async (response: any) => {
           try {
             await api.post("/billing/razorpay/verify", response);
@@ -67,8 +67,10 @@ export default function BillingPage() {
             setError("Payment verification failed. Contact support.");
           }
         },
-        prefill: { email: me?.email || "" },
+        prefill: { email: me?.email || "", name: me?.full_name || "" },
+        notes: { plan: planName },
         theme: { color: "#4f8aff" },
+        modal: { ondismiss: () => setPaying(null) },
       });
       rzp.open();
     } catch (err: any) {

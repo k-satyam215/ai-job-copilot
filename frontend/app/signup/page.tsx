@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { api } from "../../lib/api";
+import { api, saveSession } from "../../lib/api";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -29,7 +29,7 @@ export default function SignupPage() {
         password,
         phone: phone || undefined,
       });
-      localStorage.setItem("token", res.data.access_token);
+      saveSession(res.data.access_token);
       setSuccess("Account created! Check your email to verify your account.");
       setTimeout(() => router.push("/dashboard"), 2000);
     } catch (err: any) {

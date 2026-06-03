@@ -34,7 +34,7 @@ export default function PricingPage() {
         "500 opportunities/day",
       ],
       cta: "Upgrade to Pro",
-      href: "/billing",
+      href: "/login?redirect=/billing&plan=pro",
       highlight: true,
     },
     {
@@ -52,7 +52,7 @@ export default function PricingPage() {
         "Advanced analytics dashboard",
       ],
       cta: "Upgrade to Elite",
-      href: "/billing",
+      href: "/login?redirect=/billing&plan=elite",
       highlight: false,
     },
   ];

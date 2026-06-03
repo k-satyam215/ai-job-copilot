@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { api } from "../../lib/api";
+import { useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { api, saveSession } from "../../lib/api";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirect") || "/dashboard";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -17,8 +19,8 @@ export default function LoginPage() {
     setError("");
     try {
       const res = await api.post("/auth/login", { email, password });
-      localStorage.setItem("token", res.data.access_token);
-      router.push("/dashboard");
+      saveSession(res.data.access_token);
+      router.push(redirectTo);
     } catch (err: any) {
       setError(err.response?.data?.detail || "Login failed. Check your credentials.");
     } finally {
@@ -102,5 +104,13 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
   );
 }
