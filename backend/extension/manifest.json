@@ -1,0 +1,32 @@
+{
+  "manifest_version": 3,
+  "name": "AI Job Copilot",
+  "version": "1.0",
+
+  "permissions": ["storage", "activeTab", "scripting", "tabs"],
+
+  "host_permissions": [
+    "http://127.0.0.1:8000/*",
+    "https://*.naukri.com/*",
+    "https://*.linkedin.com/*"
+  ],
+
+  "background": {
+    "service_worker": "background.js"
+  },
+
+  "action": {
+    "default_popup": "popup.html"
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["https://*.naukri.com/*"],
+      "js": ["secure_storage.js", "token_rotator.js", "form_parser.js", "form_filler.js", "dom_observer.js", "action_executor.js", "workflow_controller.js", "ai_form_engine.js", "content_naukri.js"]
+    },
+    {
+      "matches": ["https://*.linkedin.com/*"],
+      "js": ["secure_storage.js", "token_rotator.js", "form_parser.js", "form_filler.js", "dom_observer.js", "action_executor.js", "workflow_controller.js", "ai_form_engine.js", "content.js"]
+    }
+  ]
+}

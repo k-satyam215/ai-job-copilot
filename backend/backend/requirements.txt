@@ -1,0 +1,17 @@
+fastapi
+uvicorn[standard]
+python-dotenv
+python-multipart
+SQLAlchemy
+pydantic[email]
+pydantic-settings
+python-jose[cryptography]
+PyMuPDF
+httpx
+playwright
+psycopg[binary]
+alembic
+slowapi
+sentry-sdk[fastapi]
+passlib[bcrypt]
+groq
