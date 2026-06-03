@@ -135,8 +135,9 @@ if settings.rate_limit_per_minute > 0:
 
 
 # ---------- Public routes ----------
-@app.get("/", tags=["meta"], include_in_schema=False)
+@app.api_route("/", methods=["GET", "HEAD"], tags=["meta"], include_in_schema=False)
 def home():
+    """Root endpoint — supports HEAD for Render health checks and uptime monitors."""
     return {
         "name": settings.app_name,
         "tagline": "Your autonomous AI career agent",
@@ -149,9 +150,9 @@ def home():
     }
 
 
-@app.get("/health", tags=["meta"])
+@app.api_route("/health", methods=["GET", "HEAD"], tags=["meta"])
 def health():
-    """Liveness probe — does NOT touch the database."""
+    """Liveness probe — supports HEAD for Render health checks."""
     return {
         "status": "ok",
         "service": settings.app_name,
@@ -211,7 +212,7 @@ async def _startup_banner():
     logger.info(" Billing: razorpay=%s stripe=%s", settings.razorpay_enabled, settings.stripe_enabled)
     logger.info("=" * 60)
 
-    # ---------- Background job poller (P0 #2 fix) ----------
+    # ---------- Background job poller ----------
     if settings.app_env != "development" or not settings.is_sqlite:
         try:
             import asyncio as _asyncio
