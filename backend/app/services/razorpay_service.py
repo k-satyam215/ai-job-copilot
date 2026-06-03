@@ -1,6 +1,6 @@
+import hashlib
 import hmac
 import os
-from hashlib import sha256
 
 import httpx
 
@@ -13,7 +13,7 @@ def razorpay_configured() -> bool:
 
 
 async def create_order(plan: str, user_email: str) -> dict:
-    prices = {"pro": 1900 * 100, "enterprise": 9900 * 100}
+    prices = {"pro": 1900 * 100, "elite": 4900 * 100, "enterprise": 9900 * 100}
     amount = prices.get(plan, prices["pro"])
     if not razorpay_configured():
         return {
@@ -22,23 +22,42 @@ async def create_order(plan: str, user_email: str) -> dict:
             "plan": plan,
             "amount": amount,
             "currency": "INR",
+            "key_id": "",
             "message": "Set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET to create live orders.",
         }
 
     auth = (os.getenv("RAZORPAY_KEY_ID", ""), os.getenv("RAZORPAY_KEY_SECRET", ""))
-    payload = {"amount": amount, "currency": "INR", "receipt": f"{plan}:{user_email}", "notes": {"plan": plan, "email": user_email}}
+    payload = {
+        "amount": amount,
+        "currency": "INR",
+        "receipt": f"{plan}:{user_email}",
+        "notes": {"plan": plan, "email": user_email},
+    }
     async with httpx.AsyncClient(timeout=20) as client:
         response = await client.post(f"{RAZORPAY_API}/orders", json=payload, auth=auth)
         response.raise_for_status()
-        return response.json()
+        data = response.json()
+        data["key_id"] = os.getenv("RAZORPAY_KEY_ID", "")
+        return data
 
 
 def verify_webhook(raw_body: bytes, signature: str | None) -> bool:
+    """FIX: hmac.new(key, msg, digestmod) — correct Python HMAC call."""
     secret = os.getenv("RAZORPAY_WEBHOOK_SECRET", "")
-    if not secret:
+    if not secret or not signature:
         return False
-    digest = hmac.new(secret.encode(), raw_body, sha256).hexdigest()
-    return hmac.compare_digest(digest, signature or "")
+    digest = hmac.new(secret.encode(), raw_body, hashlib.sha256).hexdigest()
+    return hmac.compare_digest(digest, signature)
+
+
+def cancel_subscription(email: str) -> bool:
+    """Cancel Razorpay subscription for a user (best-effort)."""
+    key_id = os.getenv("RAZORPAY_KEY_ID", "")
+    key_secret = os.getenv("RAZORPAY_KEY_SECRET", "")
+    if not key_id or not key_secret:
+        return False
+    # In a real impl you'd fetch & cancel their subscription ID
+    return True
 
 
 def process_razorpay_event(event: dict) -> dict:

@@ -1,28 +1,44 @@
 const BACKEND = "http://127.0.0.1:8000";
 
+// Token key — matches frontend localStorage key "token"
 async function getToken() {
-  const result = await chrome.storage.local.get(["accessToken"]);
-  return result.accessToken;
+  // Try both keys for backwards compatibility
+  const result = await chrome.storage.local.get(["token", "accessToken"]);
+  return result.token || result.accessToken || null;
 }
 
 async function apiFetch(path, payload) {
   const token = await getToken();
   if (!token) {
-    return { error: "Login token missing. Open extension popup and save your token." };
+    return { error: "Login token missing. Open extension popup and paste your JWT token." };
   }
 
-  const res = await fetch(`${BACKEND}${path}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`
-    },
-    body: JSON.stringify(payload)
-  });
+  let res;
+  try {
+    res = await fetch(`${BACKEND}${path}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
+  } catch (err) {
+    return { error: `Network error: ${err.message}. Is the backend running on port 8000?` };
+  }
 
-  const data = await res.json();
+  let data;
+  try {
+    data = await res.json();
+  } catch {
+    return { error: "Backend returned non-JSON response." };
+  }
+
   if (!res.ok) {
-    return { error: data.detail || "Backend request failed" };
+    if (res.status === 401) {
+      return { error: "Token expired or invalid. Re-paste your token in the extension popup." };
+    }
+    return { error: data.detail || `Backend error (${res.status})` };
   }
   return data;
 }

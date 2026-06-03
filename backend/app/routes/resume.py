@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from app.config import get_settings
 from app.database import get_db
 from app.models.user import User
+from app.services.billing import RequireCredits
 from app.services.resume_parser import extract_resume_text, parse_resume_with_ai
 from app.utils.security import get_current_user
 
@@ -20,7 +21,7 @@ os.makedirs(settings.resume_upload_dir, exist_ok=True)
 async def upload_resume(
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_user),
+    user: User = Depends(RequireCredits("resume_parse")),
 ):
     suffix = Path(file.filename or "").suffix.lower()
     if suffix not in {".pdf", ".txt"}:
@@ -39,7 +40,12 @@ async def upload_resume(
     db.commit()
     db.refresh(user)
 
-    return {"message": "Resume parsed successfully", "file_path": file_path, "profile": profile}
+    return {
+        "message": "Resume parsed successfully",
+        "file_path": file_path,
+        "profile": profile,
+        "ai_credits_remaining": user.ai_credits,
+    }
 
 
 @router.get("/profile")

@@ -9,6 +9,8 @@ from app.services.deduplicator import upsert_job
 from app.services.cover_letter_optimizer import generate_cover_letter
 from app.services.job_aggregator import fetch_jobs_from_all_sources
 from app.services.job_parser import parse_job
+from app.services.explanation_engine import explain_recommendation
+from app.services.match_reasoning import match_reasons
 from app.services.resume_tailor import tailor_resume
 from app.services.vector_matcher import hybrid_match
 from app.utils.security import get_current_user
@@ -82,6 +84,7 @@ async def discover(payload: DiscoverPayload, db: Session = Depends(get_db), user
     for item in fetched:
         job, created = upsert_job(db, item)
         match = hybrid_match(item, profile)
+        explanation = explain_recommendation(match, item)
         saved.append({
             "id": job.id,
             "created": created,
@@ -90,6 +93,8 @@ async def discover(payload: DiscoverPayload, db: Session = Depends(get_db), user
             "source": job.source,
             "url": job.url,
             "match": match,
+            "explanation": explanation,
+            "reasons": match_reasons(match),
         })
     return {"keyword": keyword, "count": len(saved), "jobs": sorted(saved, key=lambda row: row["match"]["match_score"], reverse=True)}
 
@@ -101,10 +106,28 @@ def apply_kit(payload: JobPayload, user: User = Depends(get_current_user)):
     tailoring = tailor_resume(user.resume_text or "", job, profile)
     cover_letter = generate_cover_letter(job, profile)
     match = hybrid_match(job, profile)
+    explanation = explain_recommendation(match, job)
     return {
         "job": job,
         "match": match,
+        "explanation": explanation,
+        "reasons": match_reasons(match),
         "tailored_resume": tailoring,
         "cover_letter": cover_letter,
         "apply_mode": "AI fills and prepares; user reviews and clicks final Apply",
+    }
+
+
+@router.get("/source-health")
+def source_health():
+    return {
+        "sources": [
+            {"name": "naukri", "mode": "api", "status": "enabled"},
+            {"name": "linkedin", "mode": "search_url", "status": "enabled"},
+            {"name": "foundit", "mode": "search_url", "status": "enabled"},
+            {"name": "indeed", "mode": "search_url", "status": "enabled"},
+            {"name": "unstop", "mode": "search_url", "status": "enabled"},
+            {"name": "apna", "mode": "search_url", "status": "enabled"},
+        ],
+        "note": "Search URL sources provide fresh result entry points; dedicated APIs can be upgraded per provider.",
     }

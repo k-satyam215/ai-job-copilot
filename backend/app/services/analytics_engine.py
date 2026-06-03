@@ -11,11 +11,17 @@ def user_analytics(db: Session, user_id: int) -> dict:
     statuses = Counter(app.status for app in applications)
     avg_match = round(sum(app.match_score for app in applications) / max(len(applications), 1))
     companies = Counter(app.company for app in applications)
+    platforms = Counter(app.platform for app in applications if app.platform)
     return {
         "total_applications": len(applications),
+        # Backwards-compat keys
         "status_counts": dict(statuses),
-        "average_match_score": avg_match,
         "top_companies": companies.most_common(8),
+        # Frontend-expected keys (P0 #4 fix — frontend reads these)
+        "applications_by_status": dict(statuses),
+        "by_platform": dict(platforms),
+        # Other analytics
+        "average_match_score": avg_match,
         "interview_rate": round((statuses.get("interview", 0) / max(len(applications), 1)) * 100),
         "offer_rate": round((statuses.get("offer", 0) / max(len(applications), 1)) * 100),
     }

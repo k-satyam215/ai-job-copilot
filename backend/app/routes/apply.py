@@ -18,6 +18,7 @@ class ApplyPayload(BaseModel):
     company: str
     url: str | None = None
     source: str | None = "extension"
+    platform: str | None = None  # naukri / linkedin / foundit / etc.
     location: str | None = None
     experience: str | None = None
     description: str | None = None
@@ -26,11 +27,30 @@ class ApplyPayload(BaseModel):
     answers: dict | None = None
 
 
+class StatusUpdatePayload(BaseModel):
+    status: str
+
+
 @router.post("/")
 def apply(payload: ApplyPayload, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     data = payload.model_dump()
     job, _ = upsert_job(db, data)
     match = match_job(data, user.profile_json or {})
+
+    # Detect platform from URL if not explicitly passed
+    platform = payload.platform
+    if not platform and payload.url:
+        url_lower = (payload.url or "").lower()
+        if "naukri" in url_lower:
+            platform = "naukri"
+        elif "linkedin" in url_lower:
+            platform = "linkedin"
+        elif "foundit" in url_lower:
+            platform = "foundit"
+        elif "indeed" in url_lower:
+            platform = "indeed"
+        elif "unstop" in url_lower:
+            platform = "unstop"
 
     existing = (
         db.query(Application)
@@ -41,6 +61,8 @@ def apply(payload: ApplyPayload, db: Session = Depends(get_db), user: User = Dep
         existing.status = payload.status or existing.status
         existing.match_score = match["match_score"]
         existing.answers_json = payload.answers or existing.answers_json
+        if platform:
+            existing.platform = platform
         db.commit()
         db.refresh(existing)
         application = existing
@@ -53,6 +75,7 @@ def apply(payload: ApplyPayload, db: Session = Depends(get_db), user: User = Dep
             title=job.title,
             status=payload.status or "copilot_filled",
             match_score=match["match_score"],
+            platform=platform,
             answers_json=payload.answers,
         )
         db.add(application)
@@ -65,6 +88,7 @@ def apply(payload: ApplyPayload, db: Session = Depends(get_db), user: User = Dep
         "company": application.company,
         "role": application.title,
         "match_score": application.match_score,
+        "platform": application.platform,
         "message": "Application tracked",
     }
 
@@ -80,7 +104,47 @@ def applications(db: Session = Depends(get_db), user: User = Depends(get_current
             "job_url": row.job_url,
             "status": row.status,
             "match_score": row.match_score,
+            "platform": row.platform,
             "created_at": row.created_at.isoformat(),
         }
         for row in rows
     ]
+
+
+@router.patch("/{application_id}/status")
+def update_status(
+    application_id: int,
+    payload: StatusUpdatePayload,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Update application status (e.g. applied → interview → offer → rejected)."""
+    app = db.query(Application).filter(
+        Application.id == application_id,
+        Application.user_id == user.id,
+    ).first()
+    if not app:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="Application not found")
+    app.status = payload.status
+    db.commit()
+    db.refresh(app)
+    return {"id": app.id, "status": app.status, "message": "Status updated"}
+
+
+@router.delete("/{application_id}")
+def delete_application(
+    application_id: int,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    app = db.query(Application).filter(
+        Application.id == application_id,
+        Application.user_id == user.id,
+    ).first()
+    if not app:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="Application not found")
+    db.delete(app)
+    db.commit()
+    return {"message": "Application deleted"}

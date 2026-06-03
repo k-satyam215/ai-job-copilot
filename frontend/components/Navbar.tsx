@@ -1,14 +1,30 @@
+"use client";
+
 import { getToken } from "../lib/api";
 
-export default function Navbar({ title }: { title: string }) {
-  const hasToken = typeof window !== "undefined" && Boolean(getToken());
+interface NavbarProps {
+  title: string;
+  subtitle?: string;
+  eyebrow?: string;
+  actions?: React.ReactNode;
+}
+
+export default function Navbar({ title, subtitle, eyebrow, actions }: NavbarProps) {
+  const isConnected = typeof window !== "undefined" && Boolean(getToken());
+
   return (
-    <div className="topbar">
-      <div>
-        <div className="muted">Autonomous career agent</div>
-        <h1 style={{ margin: "4px 0 0" }}>{title}</h1>
+    <div className="page-header">
+      <div className="page-title-block">
+        {eyebrow && <div className="page-eyebrow">{eyebrow}</div>}
+        <h1>{title}</h1>
+        {subtitle && <p>{subtitle}</p>}
       </div>
-      <span className="badge">{hasToken ? "Connected" : "Login required"}</span>
+      <div className="page-header-actions">
+        {actions}
+        <span className={`badge ${isConnected ? "badge-green" : "badge-red"}`}>
+          {isConnected ? "● Connected" : "○ Login required"}
+        </span>
+      </div>
     </div>
   );
 }
