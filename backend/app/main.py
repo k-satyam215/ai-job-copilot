@@ -1,13 +1,4 @@
-"""Production-grade FastAPI entry point for AI Job Copilot SaaS.
-
-Adds the following SaaS hardening on top of the MVP:
-- Structured SaaS landing info at GET / (for uptime-checkers and marketing scrapers)
-- Health + readiness endpoints
-- Optional Sentry observability
-- Optional slowapi rate limiting (in-memory, per-process)
-- Standard security headers
-- CORS tightened to configured origins (no longer wildcard)
-"""
+"""Production-grade FastAPI entry point for AI Job Copilot SaaS."""
 from __future__ import annotations
 
 import logging
@@ -39,8 +30,9 @@ from app.routes import (
 settings = get_settings()
 logger = logging.getLogger(__name__)
 
-# ---------- Create tables (Alembic should replace this in prod) ----------
-Base.metadata.create_all(bind=engine)
+# Tables managed by Alembic — only use create_all for local SQLite dev
+if settings.is_sqlite:
+    Base.metadata.create_all(bind=engine)
 
 # ---------- Optional Sentry ----------
 if settings.sentry_dsn:
@@ -61,7 +53,6 @@ if settings.sentry_dsn:
         logger.warning("Sentry init failed: %s", exc)
 
 
-# ---------- App factory ----------
 app = FastAPI(
     title=settings.app_name,
     version=settings.app_version,
@@ -75,7 +66,6 @@ app = FastAPI(
 )
 
 
-# ---------- Security headers middleware ----------
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         response: Response = await call_next(request)
@@ -91,14 +81,9 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         return response
 
 
-# ---------- Trusted hosts (protect against host header injection) ----------
 if settings.is_production:
-    app.add_middleware(
-        TrustedHostMiddleware,
-        allowed_hosts=["*"],  # tighten once you have a domain
-    )
+    app.add_middleware(TrustedHostMiddleware, allowed_hosts=["*"])
 
-# ---------- CORS (tightened) ----------
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins_list or [settings.frontend_origin],
@@ -107,13 +92,10 @@ app.add_middleware(
     allow_headers=["Authorization", "Content-Type", "X-Requested-With"],
     max_age=600,
 )
-
-# ---------- Security + timing ----------
 app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(RequestTimingMiddleware)
 
 
-# ---------- Optional rate limit ----------
 if settings.rate_limit_per_minute > 0:
     try:
         from slowapi import Limiter, _rate_limit_exceeded_handler
@@ -129,22 +111,18 @@ if settings.rate_limit_per_minute > 0:
         )
         app.state.limiter = limiter
         app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
-        logger.info("Rate limit enabled: %d/min", settings.rate_limit_per_minute)
     except Exception as exc:  # noqa: BLE001
         logger.warning("slowapi not installed, rate limit disabled: %s", exc)
 
 
-# ---------- Public routes ----------
 @app.api_route("/", methods=["GET", "HEAD"], tags=["meta"], include_in_schema=False)
 def home():
-    """Root endpoint — supports HEAD for Render health checks and uptime monitors."""
     return {
         "name": settings.app_name,
         "tagline": "Your autonomous AI career agent",
         "version": settings.app_version,
         "status": "operational",
         "ai_enabled": settings.ai_enabled,
-        "docs": "/docs" if not settings.is_production else None,
         "health": "/health",
         "ready": "/ready",
     }
@@ -152,7 +130,6 @@ def home():
 
 @app.api_route("/health", methods=["GET", "HEAD"], tags=["meta"])
 def health():
-    """Liveness probe — supports HEAD for Render health checks."""
     return {
         "status": "ok",
         "service": settings.app_name,
@@ -164,7 +141,6 @@ def health():
 
 @app.get("/ready", tags=["meta"])
 def ready():
-    """Readiness probe — verifies DB connectivity."""
     from sqlalchemy import text
     try:
         with engine.connect() as conn:
@@ -177,7 +153,6 @@ def ready():
         )
 
 
-# ---------- Routers ----------
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
 app.include_router(jobs.router, prefix="/jobs", tags=["jobs"])
 app.include_router(apply.router, prefix="/apply", tags=["apply"])
@@ -190,30 +165,23 @@ app.include_router(admin.router, prefix="/admin", tags=["admin"])
 app.include_router(ops.router, prefix="/ops", tags=["ops"])
 
 
-# ---------- Global error handler ----------
 @app.exception_handler(Exception)
 async def unhandled_exception_handler(request: Request, exc: Exception):
     logger.exception("Unhandled exception on %s %s", request.method, request.url.path)
     return JSONResponse(
         status_code=500,
-        content={
-            "detail": "Internal server error",
-            "path": str(request.url.path),
-        },
+        content={"detail": "Internal server error", "path": str(request.url.path)},
     )
 
 
-# ---------- Startup banner ----------
 @app.on_event("startup")
 async def _startup_banner():
     logger.info("=" * 60)
     logger.info(" %s v%s — env=%s", settings.app_name, settings.app_version, settings.app_env)
     logger.info(" AI: %s | CORS: %s", "on" if settings.ai_enabled else "off", settings.cors_origins_list)
-    logger.info(" Billing: razorpay=%s stripe=%s", settings.razorpay_enabled, settings.stripe_enabled)
     logger.info("=" * 60)
 
-    # ---------- Background job poller ----------
-    if settings.app_env != "development" or not settings.is_sqlite:
+    if not settings.is_sqlite:
         try:
             import asyncio as _asyncio
             from app.services.job_poller import start_job_poller
@@ -221,11 +189,8 @@ async def _startup_banner():
             logger.info("Background job poller scheduled")
         except Exception as exc:
             logger.warning("Job poller failed to start: %s", exc)
-    else:
-        logger.info("Job poller skipped (local SQLite dev mode)")
 
 
-# ---------- Shutdown ----------
 @app.on_event("shutdown")
 async def _shutdown():
     logger.info("Shutting down %s ...", settings.app_name)
