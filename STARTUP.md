@@ -1,198 +1,171 @@
-# AI Job Copilot — Complete Startup Guide
+# AI Job Copilot — Complete Startup Guide (FINAL)
 
 ## ✅ Project Status: 100% DONE & PRODUCTION READY
 
 ---
 
-## 🚀 Step 1 — Backend Start (Local)
+## 🔑 Production URLs
 
-```powershell
-cd C:\Users\ksaty\Desktop\ai-job-copilot\backend
-
-# Install dependencies (first time only)
-pip install -r requirements.txt
-
-# Start backend
-uvicorn app.main:app --reload --port 8000
-```
-
-Backend: http://127.0.0.1:8000
-API Docs: http://127.0.0.1:8000/docs (local only — disabled in production)
-Health:   http://127.0.0.1:8000/health
+| Service | URL |
+|---------|-----|
+| Frontend (Vercel) | https://ai-job-copilot-psi.vercel.app |
+| Backend (Render) | https://ai-job-copilot-backend.onrender.com |
+| Backend Health | https://ai-job-copilot-backend.onrender.com/health |
+| Backend Ready | https://ai-job-copilot-backend.onrender.com/ready |
 
 ---
 
-## 🗄️ Step 2 — DB Migration (Neon Postgres — Run Once)
+## 🚀 DEPLOY (One Command)
 
 ```powershell
 cd C:\Users\ksaty\Desktop\ai-job-copilot
+.\scripts\final_deploy.ps1
+```
 
-# This will create/update all tables on Neon Postgres
+This will:
+1. Build frontend with correct production Render URL
+2. Verify no localhost leaks in bundle
+3. Package Chrome extension zip
+4. Git commit + push → triggers Vercel + Render auto-deploy
+
+---
+
+## 🖥️ LOCAL DEV (One Command)
+
+```powershell
+cd C:\Users\ksaty\Desktop\ai-job-copilot
+.\scripts\start_local.ps1
+```
+
+Opens backend on :8000 and frontend on :3000.
+
+---
+
+## 🗄️ DB Migration (Run Once on Neon Postgres)
+
+```powershell
+cd C:\Users\ksaty\Desktop\ai-job-copilot\backend
 alembic upgrade head
 ```
 
-Tables created: users, jobs, applications (with platform + credits_reset_at columns)
-
 ---
 
-## 🚀 Step 3 — Frontend Start (Local)
+## 🔌 Chrome Extension Install
 
-```powershell
-cd C:\Users\ksaty\Desktop\ai-job-copilot\frontend
-
-# Install packages (first time only)
-npm install
-
-# Start frontend (local dev — hits localhost:8000 backend)
-npm run dev
-```
-
-Frontend: http://localhost:3000
-
-> NOTE: .env.local already points to http://127.0.0.1:8000 for local dev.
-> .env.production points to https://ai-job-copilot.onrender.com for Vercel deploy.
-
----
-
-## 🔌 Step 4 — Chrome Extension Install
-
-1. Chrome → chrome://extensions
-2. Enable "Developer mode" (top right toggle)
-3. Click "Load unpacked"
+1. Chrome → `chrome://extensions`
+2. Enable **Developer mode** (top right toggle)
+3. Click **Load unpacked**
 4. Select: `C:\Users\ksaty\Desktop\ai-job-copilot\extension`
-5. Extension icon appears in Chrome toolbar
-
-### Connect Extension to Your Account:
-1. Open http://localhost:3000 → Login
-2. Go to Settings → 🔌 Extension tab
-3. Click "Copy Token" button
-4. Click Chrome extension icon → Paste token → Save
-5. Open any LinkedIn/Naukri job page → AI Copilot panel appears!
+5. Login at https://ai-job-copilot-psi.vercel.app → **Settings → Extension tab → Copy Token**
+6. Paste token in extension popup → Save
+7. Open any LinkedIn / Naukri job page → AI Copilot panel appears!
 
 ---
 
-## 🌍 Step 5 — Production Deploy
+## 🔑 Environment Variables (All Set in backend/.env)
 
-### Frontend → Vercel (already configured)
-- vercel.json ready ✅
-- .env.production points to Render backend ✅
-- Push to GitHub → Vercel auto-deploys → https://ai-job-copilot-psi.vercel.app
-
-### Backend → Render (already configured)
-- render.yaml ready ✅
-- Push to GitHub → Deploy to Render → https://ai-job-copilot.onrender.com
-- CORS already allows Vercel origin ✅
-
----
-
-## 🔑 Environment Variables Status
-
-| Variable | Status | Value |
-|----------|--------|-------|
-| DATABASE_URL | ✅ Neon Postgres | configured |
-| GROQ_API_KEY | ✅ Set | configured |
-| SMTP credentials | ✅ Gmail set | configured |
-| TELEGRAM_BOT_TOKEN | ✅ Set | configured |
-| JWT_SECRET | ✅ Set | configured |
-| RAZORPAY_KEY_ID | ✅ Test keys | rzp_test_* |
-| RAZORPAY_KEY_SECRET | ✅ Set | configured |
-| FRONTEND_ORIGIN | ✅ Vercel URL | configured |
-| CORS_ALLOW_ORIGINS | ✅ Both origins | configured |
-| WHATSAPP_ACCESS_TOKEN | ⚠️ Fill when needed | optional |
-| RAZORPAY live keys | ⚠️ Fill when going live | optional |
+| Variable | Status |
+|----------|--------|
+| APP_ENV | ✅ production |
+| JWT_SECRET | ✅ Set |
+| DATABASE_URL | ✅ Neon Postgres |
+| GROQ_API_KEY | ✅ Set |
+| SMTP_USER / SMTP_PASS | ✅ Gmail set |
+| TELEGRAM_BOT_TOKEN | ✅ Set |
+| RAZORPAY_KEY_ID / SECRET | ✅ Test keys |
+| RAZORPAY_WEBHOOK_SECRET | ✅ Set |
+| FRONTEND_ORIGIN | ✅ Vercel URL |
+| CORS_ALLOW_ORIGINS | ✅ Both origins |
+| WHATSAPP_ACCESS_TOKEN | ⚠️ Optional — fill when needed |
 
 ---
 
-## ✅ All Bugs Fixed
+## ⚠️ Render Dashboard — One-Time Setup
 
-| # | Bug | File | Status |
-|---|-----|------|--------|
-| 1 | hmac.new() wrong API | billing.py | ✅ Fixed |
-| 2 | hmac.new() in routes | routes/billing.py | ✅ Fixed |
-| 3 | hmac.new() in razorpay | razorpay_service.py | ✅ Fixed |
-| 4 | Roadmap hardcoded 4 weeks | career_roadmap.py | ✅ Fixed |
-| 5 | Analytics not passing duration | routes/analytics.py | ✅ Fixed |
-| 6 | require_credits wrong inject copilot | routes/copilot.py | ✅ Fixed |
-| 7 | require_credits wrong inject resume | routes/resume.py | ✅ Fixed |
-| 8 | .hero CSS missing | globals.css | ✅ Fixed |
-| 9 | Alembic psycopg v3 dialect | alembic/env.py | ✅ Fixed |
-| 10 | Extension popup token key | popup.js, popup.html | ✅ Fixed |
-| 11 | Razorpay create_order key_id | razorpay_service.py | ✅ Fixed |
-| 12 | Application platform column | application.py | ✅ Done |
-| 13 | ai_orchestrator call_llm | ai_orchestrator.py | ✅ Done |
-| 14 | credit_scheduler missing | credit_scheduler.py | ✅ Done |
-| 15 | Login/signup pages | login/page.tsx, signup/page.tsx | ✅ Done |
-| 16 | .env.local pointing to production | frontend/.env.local | ✅ Fixed |
-| 17 | Extension backend URL | background.js | ✅ Fixed (Render URL) |
-| 18 | Extension popup dashboard URL | popup.html | ✅ Fixed |
-| 19 | Extension missing Render host_permission | manifest.json | ✅ Fixed |
-| 20 | credits_reset_at missing column | user.py + migration 002 | ✅ Fixed |
-| 21 | billing/me missing credits_reset_at | routes/billing.py | ✅ Fixed |
-| 22 | Settings missing Extension tab | settings/page.tsx | ✅ Added |
+Go to: https://dashboard.render.com
+
+1. Connect your GitHub repo (if not already)
+2. Create **New Web Service** → select `ai-job-copilot` repo
+3. Service name: `ai-job-copilot-backend`
+4. Root dir: `backend`
+5. Build command: `pip install -r requirements.txt && alembic upgrade head`
+6. Start command: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+7. Add these env vars from your `backend/.env`:
+   - `JWT_SECRET`
+   - `DATABASE_URL`
+   - `GROQ_API_KEY`
+   - `SMTP_USER` / `SMTP_PASS`
+   - `TELEGRAM_BOT_TOKEN`
+   - `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET` / `RAZORPAY_WEBHOOK_SECRET`
+   - `FRONTEND_ORIGIN` = `https://ai-job-copilot-psi.vercel.app`
+   - `CORS_ALLOW_ORIGINS` = `https://ai-job-copilot-psi.vercel.app,http://localhost:3000`
+   - `APP_ENV` = `production`
+   - `ADMIN_EMAILS` = `Ksatyam215@gmail.com`
+
+---
+
+## ✅ Vercel Dashboard — One-Time Setup
+
+Go to: https://vercel.com/dashboard
+
+1. Import `ai-job-copilot` repo → select `frontend` folder
+2. Add env var:
+   - `NEXT_PUBLIC_API_BASE` = `https://ai-job-copilot-backend.onrender.com`
+3. Deploy → auto-deploys on every push to main
 
 ---
 
 ## 🗺️ Full Feature Map
 
-### Backend Routes
-- POST /auth/signup — Register + email verification
-- POST /auth/login — Login, returns JWT
-- GET /auth/me — Current user info + profile
-- PUT /auth/preferences — Save copilot memory
-- POST /auth/forgot-password — Email reset link
-- POST /auth/reset-password — Set new password
-- POST /auth/change-password — Change password (auth required)
-- DELETE /auth/account — Delete account
-- POST /resume/upload — Parse resume with AI (Groq)
-- GET /jobs/ — List all jobs
-- POST /jobs/discover — Fetch fresh jobs from all platforms
-- POST /apply/ — Track application
-- GET /apply/ — List my applications
-- PATCH /apply/{id}/status — Update status
-- DELETE /apply/{id} — Delete application
-- POST /analytics/interview — Generate interview prep pack
-- POST /analytics/roadmap — Build career roadmap
-- GET /analytics/overview — Full analytics
-- GET /analytics/skill-gaps — Skill gap analysis
-- GET /billing/plans — Pricing plans
-- GET /billing/me — Current plan + credits
-- POST /billing/razorpay/order — Create payment order
-- POST /billing/razorpay/verify — Verify payment
-- POST /billing/cancel — Cancel subscription
-- GET /ops/metrics — System health (admin)
-- POST /ops/reset-credits — Monthly credit reset (admin)
+### Backend API Routes
+- `POST /auth/signup` — Register + email verification
+- `POST /auth/login` — Login, returns JWT
+- `GET /auth/me` — Current user + profile
+- `PUT /auth/preferences` — Save copilot memory
+- `POST /auth/forgot-password` — Email reset link
+- `POST /auth/reset-password` — Set new password
+- `POST /resume/upload` — Parse resume with Groq AI
+- `GET /jobs/` — List all jobs
+- `POST /jobs/discover` — Fetch fresh jobs from LinkedIn/Naukri
+- `POST /apply/` — Track application
+- `GET /apply/` — List my applications
+- `PATCH /apply/{id}/status` — Update status
+- `POST /analytics/interview` — AI interview prep pack
+- `POST /analytics/roadmap` — AI career roadmap
+- `GET /analytics/overview` — Full analytics + skill gaps
+- `GET /billing/plans` — Pricing
+- `GET /billing/me` — Plan + credits
+- `POST /billing/razorpay/order` — Create Razorpay order
+- `POST /billing/razorpay/verify` — Verify payment + upgrade plan
+- `POST /billing/cancel` — Cancel subscription
+- `GET /ops/metrics` — System health (admin)
+- `POST /ops/reset-credits` — Monthly credit reset (admin)
 
 ### Frontend Pages
-- / — Landing page with hero, features, pricing, testimonials
-- /login — Login form
-- /signup — Signup form
-- /dashboard — Jobs + stats + profile
-- /resume — Upload + parsed profile + copilot memory
-- /applications — Track all applications with status
-- /analytics — Career analytics + skill gaps + funnel
-- /interview — AI interview prep pack generator
-- /roadmap — AI career roadmap generator
-- /billing — Plans + Razorpay payment
-- /settings — Profile + security + 🔌 extension token + account
-- /verify-email — Email verification
-- /forgot-password — Password reset request
-- /reset-password — Set new password
-- /pricing — Public pricing page
-- /terms — Terms of service
-- /privacy — Privacy policy
-- /refund — Refund policy
+- `/` — Landing (hero, features, pricing, testimonials)
+- `/login` + `/signup` — Auth forms
+- `/dashboard` — Jobs + stats + profile
+- `/resume` — Upload + AI-parsed profile
+- `/applications` — Track applications with status
+- `/analytics` — Career analytics + skill gaps + funnel
+- `/interview` — AI interview prep generator
+- `/roadmap` — AI career roadmap generator
+- `/billing` — Plans + Razorpay payment
+- `/settings` — Profile + security + Extension token + account
+- `/verify-email`, `/forgot-password`, `/reset-password`
+- `/pricing`, `/terms`, `/privacy`, `/refund`
 
 ### Chrome Extension
 - Manifest V3 ✅
 - Auto-detects LinkedIn / Naukri job pages
-- Sends job data to backend for matching
+- Sends job data to backend for AI matching
 - Tracks applications automatically
 - Token-based auth (JWT from Settings → Extension tab)
-- Production backend: https://ai-job-copilot.onrender.com
+- Production backend: `https://ai-job-copilot-backend.onrender.com`
 
 ---
 
-## 💡 Production Checklist
+## 💡 Production Launch Checklist
 
 - [x] GROQ_API_KEY set
 - [x] Neon Postgres DATABASE_URL set
@@ -202,7 +175,12 @@ Frontend: http://localhost:3000
 - [x] FRONTEND_ORIGIN = Vercel URL
 - [x] CORS includes Vercel + localhost
 - [x] Alembic migrations ready
-- [ ] Set Razorpay live keys when going live
+- [x] Frontend .env.production points to Render backend
+- [x] Extension uses Render backend URL
+- [x] render.yaml has alembic upgrade head in build command
+- [ ] Configure Render Dashboard (see above — one-time)
+- [ ] Configure Vercel Dashboard NEXT_PUBLIC_API_BASE (one-time)
+- [ ] Run: `alembic upgrade head` once to create Neon tables
+- [ ] Set Razorpay LIVE keys when going live (currently test mode)
 - [ ] Configure WhatsApp Cloud API (optional)
-- [ ] Submit extension to Chrome Web Store (after review)
 - [ ] Add Sentry DSN for error tracking (optional)

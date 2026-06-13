@@ -3,10 +3,12 @@ services:
     name: ai-job-copilot-backend
     runtime: python
     rootDir: backend
-    buildCommand: pip install -r requirements.txt
+    buildCommand: pip install -r requirements.txt && alembic upgrade head
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /health
     envVars:
+      - key: APP_ENV
+        value: production
       - key: JWT_SECRET
         sync: false
       - key: DATABASE_URL
@@ -14,17 +16,17 @@ services:
       - key: GROQ_API_KEY
         sync: false
       - key: FRONTEND_ORIGIN
-        sync: false
+        value: https://ai-job-copilot-psi.vercel.app
       - key: CORS_ALLOW_ORIGINS
-        sync: false
+        value: "https://ai-job-copilot-psi.vercel.app,http://localhost:3000,http://127.0.0.1:3000"
+      - key: RAZORPAY_ENABLED
+        value: "true"
       - key: RAZORPAY_KEY_ID
         sync: false
       - key: RAZORPAY_KEY_SECRET
         sync: false
       - key: RAZORPAY_WEBHOOK_SECRET
         sync: false
-      - key: RAZORPAY_ENABLED
-        value: "true"
       - key: SMTP_HOST
         value: smtp.gmail.com
       - key: SMTP_PORT
@@ -33,5 +35,7 @@ services:
         sync: false
       - key: SMTP_PASS
         sync: false
-      - key: APP_ENV
-        value: production
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: ADMIN_EMAILS
+        sync: false

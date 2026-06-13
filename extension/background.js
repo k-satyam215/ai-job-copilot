@@ -1,4 +1,4 @@
-const BACKEND = "https://ai-job-copilot.onrender.com";
+const BACKEND = "https://ai-job-copilot-backend.onrender.com";
 
 // Token key — matches frontend localStorage key "token"
 async function getToken() {
@@ -24,7 +24,7 @@ async function apiFetch(path, payload) {
       body: JSON.stringify(payload),
     });
   } catch (err) {
-    return { error: `Network error: ${err.message}. Is the backend running on port 8000?` };
+    return { error: `Network error: ${err.message}. Is the backend running?` };
   }
 
   let data;
