@@ -1,186 +1,124 @@
-# AI Job Copilot — Complete Startup Guide (FINAL)
+# AI Job Copilot — Complete Launch Guide
 
-## ✅ Project Status: 100% DONE & PRODUCTION READY
-
----
-
-## 🔑 Production URLs
-
-| Service | URL |
-|---------|-----|
-| Frontend (Vercel) | https://ai-job-copilot-psi.vercel.app |
-| Backend (Render) | https://ai-job-copilot-backend.onrender.com |
-| Backend Health | https://ai-job-copilot-backend.onrender.com/health |
-| Backend Ready | https://ai-job-copilot-backend.onrender.com/ready |
+## 🟢 LIVE URLS
+| Service  | URL |
+|----------|-----|
+| Frontend | https://ai-job-copilot-psi.vercel.app |
+| Backend  | https://ai-job-copilot-backend-vsdc.onrender.com |
+| Health   | https://ai-job-copilot-backend-vsdc.onrender.com/health |
 
 ---
 
-## 🚀 DEPLOY (One Command)
-
-```powershell
-cd C:\Users\ksaty\Desktop\ai-job-copilot
-.\scripts\final_deploy.ps1
+## 🏗️ Architecture
+```
+ai-job-copilot/           ← Root repo (GitHub: k-satyam215/ai-job-copilot)
+├── frontend/             ← Next.js 14, deployed on Vercel
+├── extension/            ← Chrome Extension (load unpacked)
+├── backend/              ← Separate nested git repo
+│   ├── app/
+│   │   ├── main.py       ← FastAPI entrypoint
+│   │   ├── config.py     ← Pydantic settings
+│   │   ├── routes/       ← auth, jobs, billing, resume, etc.
+│   │   ├── models/       ← SQLAlchemy models
+│   │   ├── services/     ← AI services, scrapers, billing
+│   │   └── utils/        ← JWT, security
+│   ├── alembic/          ← DB migrations
+│   └── requirements.txt
+└── render.yaml           ← Render deploy config
 ```
 
-This will:
-1. Build frontend with correct production Render URL
-2. Verify no localhost leaks in bundle
-3. Package Chrome extension zip
-4. Git commit + push → triggers Vercel + Render auto-deploy
-
 ---
 
-## 🖥️ LOCAL DEV (One Command)
+## ⚙️ Environment Variables
 
-```powershell
-cd C:\Users\ksaty\Desktop\ai-job-copilot
-.\scripts\start_local.ps1
+### Backend (Render Dashboard → Environment)
+```
+APP_ENV=production
+JWT_SECRET=c723d44c-32b0-4182-9058-eb21cf92dc12
+DATABASE_URL=postgresql://neondb_owner:npg_ZtPWwL1cdA9V@ep-billowing-hall-aqoabhgq.c-8.us-east-1.aws.neon.tech/neondb?sslmode=require
+GROQ_API_KEY=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
+GROQ_MODEL=llama-3.3-70b-versatile
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=Ksatyam215@gmail.com
+SMTP_PASS=duux lvbu nhqa mtdy
+TELEGRAM_BOT_TOKEN=8435118600:AAHEgY49pXXofnoJq08PQpKZarvwhzNVd78
+RAZORPAY_KEY_ID=rzp_test_Sx5w1hHCLZ052H
+RAZORPAY_KEY_SECRET=gW8y9rcGID3O1BAQDkLSlPtJ
+RAZORPAY_WEBHOOK_SECRET=rzp_test_webhook_secret
+RAZORPAY_ENABLED=true
+FRONTEND_ORIGIN=https://ai-job-copilot-psi.vercel.app
+CORS_ALLOW_ORIGINS=https://ai-job-copilot-psi.vercel.app,http://localhost:3000
+ADMIN_EMAILS=Ksatyam215@gmail.com
+ACCESS_TOKEN_EXPIRE_MINUTES=10080
 ```
 
-Opens backend on :8000 and frontend on :3000.
+### Frontend (Vercel Dashboard → Environment Variables)
+```
+NEXT_PUBLIC_API_BASE=https://ai-job-copilot-backend-vsdc.onrender.com
+```
 
 ---
 
-## 🗄️ DB Migration (Run Once on Neon Postgres)
+## 🚀 Render Settings
+- **Service Name**: ai-job-copilot-backend
+- **Root Directory**: backend
+- **Build Command**: `pip install -r requirements.txt`
+- **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+- **Health Check**: `/health`
 
+> Note: alembic upgrade head is NOT in build command because tables already exist on Neon DB.
+
+---
+
+## 💻 Local Development
 ```powershell
+# Start backend
 cd C:\Users\ksaty\Desktop\ai-job-copilot\backend
-alembic upgrade head
+..\\.venv\Scripts\Activate.ps1
+uvicorn app.main:app --reload --port 8000
+
+# Start frontend
+cd C:\Users\ksaty\Desktop\ai-job-copilot\frontend
+npm run dev
 ```
 
 ---
 
-## 🔌 Chrome Extension Install
-
-1. Chrome → `chrome://extensions`
-2. Enable **Developer mode** (top right toggle)
-3. Click **Load unpacked**
-4. Select: `C:\Users\ksaty\Desktop\ai-job-copilot\extension`
-5. Login at https://ai-job-copilot-psi.vercel.app → **Settings → Extension tab → Copy Token**
-6. Paste token in extension popup → Save
-7. Open any LinkedIn / Naukri job page → AI Copilot panel appears!
+## 🔌 Chrome Extension Setup
+1. Chrome → `chrome://extensions` → Developer Mode ON
+2. "Load Unpacked" → select `C:\Users\ksaty\Desktop\ai-job-copilot\extension`
+3. Open dashboard → Settings → copy your JWT token
+4. Paste token in extension popup
+5. Go to Naukri/LinkedIn → extension auto-fills forms
 
 ---
 
-## 🔑 Environment Variables (All Set in backend/.env)
+## 📤 Pushing Code
+```powershell
+# Push root repo
+cd C:\Users\ksaty\Desktop\ai-job-copilot
+git add . && git commit -m "update" && git push origin main
 
-| Variable | Status |
-|----------|--------|
-| APP_ENV | ✅ production |
-| JWT_SECRET | ✅ Set |
-| DATABASE_URL | ✅ Neon Postgres |
-| GROQ_API_KEY | ✅ Set |
-| SMTP_USER / SMTP_PASS | ✅ Gmail set |
-| TELEGRAM_BOT_TOKEN | ✅ Set |
-| RAZORPAY_KEY_ID / SECRET | ✅ Test keys |
-| RAZORPAY_WEBHOOK_SECRET | ✅ Set |
-| FRONTEND_ORIGIN | ✅ Vercel URL |
-| CORS_ALLOW_ORIGINS | ✅ Both origins |
-| WHATSAPP_ACCESS_TOKEN | ⚠️ Optional — fill when needed |
+# Push backend repo
+cd C:\Users\ksaty\Desktop\ai-job-copilot\backend
+git add app/ alembic/ && git commit -m "update" && git push origin main
+```
 
 ---
 
-## ⚠️ Render Dashboard — One-Time Setup
-
-Go to: https://dashboard.render.com
-
-1. Connect your GitHub repo (if not already)
-2. Create **New Web Service** → select `ai-job-copilot` repo
-3. Service name: `ai-job-copilot-backend`
-4. Root dir: `backend`
-5. Build command: `pip install -r requirements.txt && alembic upgrade head`
-6. Start command: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
-7. Add these env vars from your `backend/.env`:
-   - `JWT_SECRET`
-   - `DATABASE_URL`
-   - `GROQ_API_KEY`
-   - `SMTP_USER` / `SMTP_PASS`
-   - `TELEGRAM_BOT_TOKEN`
-   - `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET` / `RAZORPAY_WEBHOOK_SECRET`
-   - `FRONTEND_ORIGIN` = `https://ai-job-copilot-psi.vercel.app`
-   - `CORS_ALLOW_ORIGINS` = `https://ai-job-copilot-psi.vercel.app,http://localhost:3000`
-   - `APP_ENV` = `production`
-   - `ADMIN_EMAILS` = `Ksatyam215@gmail.com`
+## 🧪 Testing
+1. Visit https://ai-job-copilot-psi.vercel.app
+2. Landing page → Sign Up → Dashboard
+3. Upload resume (PDF) → AI parses profile
+4. Click "Find Fresh Jobs" → jobs load from 8+ portals
+5. Click "Start free" on billing → Razorpay test checkout
 
 ---
 
-## ✅ Vercel Dashboard — One-Time Setup
-
-Go to: https://vercel.com/dashboard
-
-1. Import `ai-job-copilot` repo → select `frontend` folder
-2. Add env var:
-   - `NEXT_PUBLIC_API_BASE` = `https://ai-job-copilot-backend.onrender.com`
-3. Deploy → auto-deploys on every push to main
-
----
-
-## 🗺️ Full Feature Map
-
-### Backend API Routes
-- `POST /auth/signup` — Register + email verification
-- `POST /auth/login` — Login, returns JWT
-- `GET /auth/me` — Current user + profile
-- `PUT /auth/preferences` — Save copilot memory
-- `POST /auth/forgot-password` — Email reset link
-- `POST /auth/reset-password` — Set new password
-- `POST /resume/upload` — Parse resume with Groq AI
-- `GET /jobs/` — List all jobs
-- `POST /jobs/discover` — Fetch fresh jobs from LinkedIn/Naukri
-- `POST /apply/` — Track application
-- `GET /apply/` — List my applications
-- `PATCH /apply/{id}/status` — Update status
-- `POST /analytics/interview` — AI interview prep pack
-- `POST /analytics/roadmap` — AI career roadmap
-- `GET /analytics/overview` — Full analytics + skill gaps
-- `GET /billing/plans` — Pricing
-- `GET /billing/me` — Plan + credits
-- `POST /billing/razorpay/order` — Create Razorpay order
-- `POST /billing/razorpay/verify` — Verify payment + upgrade plan
-- `POST /billing/cancel` — Cancel subscription
-- `GET /ops/metrics` — System health (admin)
-- `POST /ops/reset-credits` — Monthly credit reset (admin)
-
-### Frontend Pages
-- `/` — Landing (hero, features, pricing, testimonials)
-- `/login` + `/signup` — Auth forms
-- `/dashboard` — Jobs + stats + profile
-- `/resume` — Upload + AI-parsed profile
-- `/applications` — Track applications with status
-- `/analytics` — Career analytics + skill gaps + funnel
-- `/interview` — AI interview prep generator
-- `/roadmap` — AI career roadmap generator
-- `/billing` — Plans + Razorpay payment
-- `/settings` — Profile + security + Extension token + account
-- `/verify-email`, `/forgot-password`, `/reset-password`
-- `/pricing`, `/terms`, `/privacy`, `/refund`
-
-### Chrome Extension
-- Manifest V3 ✅
-- Auto-detects LinkedIn / Naukri job pages
-- Sends job data to backend for AI matching
-- Tracks applications automatically
-- Token-based auth (JWT from Settings → Extension tab)
-- Production backend: `https://ai-job-copilot-backend.onrender.com`
-
----
-
-## 💡 Production Launch Checklist
-
-- [x] GROQ_API_KEY set
-- [x] Neon Postgres DATABASE_URL set
-- [x] JWT_SECRET set (strong UUID)
-- [x] SMTP Gmail credentials set
-- [x] Razorpay test keys set
-- [x] FRONTEND_ORIGIN = Vercel URL
-- [x] CORS includes Vercel + localhost
-- [x] Alembic migrations ready
-- [x] Frontend .env.production points to Render backend
-- [x] Extension uses Render backend URL
-- [x] render.yaml has alembic upgrade head in build command
-- [ ] Configure Render Dashboard (see above — one-time)
-- [ ] Configure Vercel Dashboard NEXT_PUBLIC_API_BASE (one-time)
-- [ ] Run: `alembic upgrade head` once to create Neon tables
-- [ ] Set Razorpay LIVE keys when going live (currently test mode)
-- [ ] Configure WhatsApp Cloud API (optional)
-- [ ] Add Sentry DSN for error tracking (optional)
+## 💰 Go Live Checklist
+- [ ] Replace `rzp_test_*` Razorpay keys with live keys
+- [ ] Set `RAZORPAY_WEBHOOK_SECRET` to actual webhook secret from Razorpay dashboard
+- [ ] Upgrade Render to paid plan (removes 50s cold start)
+- [ ] Add custom domain on Vercel
+- [ ] Enable Sentry DSN for error tracking
