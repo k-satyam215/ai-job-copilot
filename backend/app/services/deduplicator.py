@@ -27,8 +27,12 @@ def upsert_job(db: Session, payload: dict) -> tuple[Job, bool]:
     url = payload.get("url") or f"extension://{normalize_key(company)}-{normalize_key(title)}"
     existing = find_duplicate_job(db, title, company, url)
     if existing:
+        existing.title = title or existing.title
+        existing.company = company or existing.company
+        existing.source = payload.get("source") or existing.source
         existing.location = payload.get("location") or existing.location
         existing.experience = payload.get("experience") or existing.experience
+        existing.salary = payload.get("salary") or existing.salary
         existing.description = payload.get("description") or existing.description
         existing.skills_json = payload.get("skills") or existing.skills_json
         existing.raw_json = payload
