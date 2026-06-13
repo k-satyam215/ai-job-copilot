@@ -7,6 +7,7 @@
 
   "host_permissions": [
     "http://127.0.0.1:8000/*",
+    "https://ai-job-copilot.onrender.com/*",
     "https://*.naukri.com/*",
     "https://*.linkedin.com/*"
   ],

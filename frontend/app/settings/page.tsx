@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Sidebar from "../../components/Sidebar";
-import { api, clearSession } from "../../lib/api";
+import { api, clearSession, getToken } from "../../lib/api";
 
 const PLAN_BADGE: Record<string, string> = {
   free: "badge-neutral",
@@ -23,7 +23,18 @@ export default function SettingsPage() {
   const [error, setError] = useState("");
   const [pwError, setPwError] = useState("");
   const [deleteConfirm, setDeleteConfirm] = useState(false);
-  const [activeTab, setActiveTab] = useState<"profile" | "security" | "account">("profile");
+  const [activeTab, setActiveTab] = useState<"profile" | "security" | "account" | "extension">("profile");
+  const [tokenCopied, setTokenCopied] = useState(false);
+
+  function copyToken() {
+    const t = getToken();
+    if (t) {
+      navigator.clipboard.writeText(t).then(() => {
+        setTokenCopied(true);
+        setTimeout(() => setTokenCopied(false), 2500);
+      });
+    }
+  }
 
   useEffect(() => {
     api
@@ -138,14 +149,14 @@ export default function SettingsPage() {
 
         {/* Tabs */}
         <div style={{ display: "flex", gap: 4, marginBottom: 20, background: "rgba(255,255,255,0.03)", borderRadius: 10, padding: 4, width: "fit-content" }}>
-          {(["profile", "security", "account"] as const).map((tab) => (
+          {(["profile", "security", "extension", "account"] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`auth-tab ${activeTab === tab ? "active" : ""}`}
               style={{ minWidth: 120, textTransform: "capitalize" }}
             >
-              {tab === "profile" ? "👤 Profile" : tab === "security" ? "🔒 Security" : "⚠️ Account"}
+              {tab === "profile" ? "👤 Profile" : tab === "security" ? "🔒 Security" : tab === "extension" ? "🔌 Extension" : "⚠️ Account"}
             </button>
           ))}
         </div>
@@ -256,6 +267,44 @@ export default function SettingsPage() {
         )}
 
         {/* Account/Danger Tab */}
+        {activeTab === "extension" && (
+          <div className="card elevated">
+            <div className="section-title" style={{ marginBottom: 8 }}>🔌 Chrome Extension Token</div>
+            <p style={{ fontSize: 13, color: "var(--text-2)", marginBottom: 20, lineHeight: 1.7 }}>
+              Chrome Extension ko connect karne ke liye apna JWT token copy karo aur extension popup mein paste karo.
+            </p>
+            <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 16 }}>
+              <div className="input" style={{ flex: 1, fontFamily: "monospace", fontSize: 12, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", opacity: 0.7 }}>
+                {getToken() ? getToken()!.slice(0, 40) + "…" : "Not logged in"}
+              </div>
+              <button className="btn btn-primary" onClick={copyToken} style={{ flexShrink: 0 }}>
+                {tokenCopied ? "✓ Copied!" : "Copy Token"}
+              </button>
+            </div>
+            <div className="notice info">
+              <span>💡</span>
+              <span style={{ fontSize: 12 }}>Extension install karo → popup open karo → token paste karo → LinkedIn/Naukri pe job open karo → AI copilot panel automatically aayega.</span>
+            </div>
+            <div style={{ marginTop: 16 }}>
+              <div className="section-title" style={{ marginBottom: 10, fontSize: 13 }}>Extension Steps:</div>
+              <div className="stack" style={{ gap: 8 }}>
+                {[
+                  ["1", "Chrome open karo → chrome://extensions"],
+                  ["2", "Developer mode ON karo (top right toggle)"],
+                  ["3", "Load unpacked → ai-job-copilot/extension folder select karo"],
+                  ["4", "Upar se token copy karo → extension popup mein paste karo"],
+                  ["5", "Kisi bhi Naukri/LinkedIn job page pe jao → AI panel dikhega"],
+                ].map(([n, t]) => (
+                  <div key={n} style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+                    <span style={{ background: "rgba(79,138,255,0.1)", border: "1px solid rgba(79,138,255,0.2)", color: "var(--accent)", borderRadius: "50%", width: 22, height: 22, display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, flexShrink: 0 }}>{n}</span>
+                    <span style={{ fontSize: 13, color: "var(--text-2)", lineHeight: 1.6 }}>{t}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
         {activeTab === "account" && (
           <div className="card elevated">
             <div className="section-title" style={{ marginBottom: 8 }}>⚠️ Danger Zone</div>

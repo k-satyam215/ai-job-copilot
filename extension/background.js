@@ -1,4 +1,4 @@
-const BACKEND = "http://127.0.0.1:8000";
+const BACKEND = "https://ai-job-copilot.onrender.com";
 
 // Token key — matches frontend localStorage key "token"
 async function getToken() {

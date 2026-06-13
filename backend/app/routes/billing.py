@@ -89,6 +89,8 @@ def my_plan(user: User = Depends(get_current_user)):
         "max_credits": limits["ai_credits"],
         "limits": limits,
         "email": user.email,
+        "full_name": user.full_name,
+        "credits_reset_at": user.credits_reset_at.isoformat() if user.credits_reset_at else None,
     }
 
 

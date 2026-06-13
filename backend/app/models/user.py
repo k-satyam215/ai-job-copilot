@@ -21,15 +21,14 @@ class User(Base):
     profile_json = Column(JSON, nullable=True)
     preferences_json = Column(JSON, nullable=True)
 
-    # Email verification (P1)
     is_verified = Column(Boolean, default=False, nullable=False)
     verification_token = Column(String(128), nullable=True, index=True)
     verified_at = Column(DateTime, nullable=True)
 
-    # Password reset (P1)
     reset_token = Column(String(128), nullable=True, index=True)
     reset_token_expires_at = Column(DateTime, nullable=True)
 
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    credits_reset_at = Column(DateTime, nullable=True)
 
-    applications = relationship("Application", back_populates="user")
+    applications = relationship("Application", back_populates="user", lazy="dynamic")
