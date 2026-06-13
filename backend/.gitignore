@@ -15,7 +15,9 @@ uploads/
 frontend/.next/
 frontend/node_modules/
 outputs/
+
+# Environment secret files only (NOT env.py scripts)
 .env
 backend/.env
 frontend/.env
-*.env
+frontend/.env.local
