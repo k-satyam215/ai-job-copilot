@@ -3,16 +3,17 @@
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { api, clearSession } from "../lib/api";
+import { LogoIcon } from "./Logo";
 
 const navItems = [
-  { href: "/dashboard",   icon: "⚡", label: "Dashboard" },
-  { href: "/resume",      icon: "📄", label: "Resume" },
-  { href: "/applications",icon: "📋", label: "Applications" },
-  { href: "/analytics",   icon: "📊", label: "Analytics" },
-  { href: "/interview",   icon: "🎤", label: "Interview Prep" },
-  { href: "/roadmap",     icon: "🗺️", label: "Roadmap" },
-  { href: "/billing",     icon: "💳", label: "Billing" },
-  { href: "/settings",    icon: "⚙️", label: "Settings" },
+  { href: "/dashboard",    icon: "⚡", label: "Dashboard" },
+  { href: "/resume",       icon: "📄", label: "Resume" },
+  { href: "/applications", icon: "📋", label: "Applications" },
+  { href: "/analytics",    icon: "📊", label: "Analytics" },
+  { href: "/interview",    icon: "🎤", label: "Interview Prep" },
+  { href: "/roadmap",      icon: "🗺️", label: "Roadmap" },
+  { href: "/billing",      icon: "💳", label: "Billing" },
+  { href: "/settings",     icon: "⚙️", label: "Settings" },
 ];
 
 const PLAN_COLORS: Record<string, string> = {
@@ -35,14 +36,16 @@ export default function Sidebar() {
 
   return (
     <aside className="sidebar">
+      {/* Brand */}
       <div className="sidebar-brand">
-        <div className="brand-icon">🤖</div>
+        <LogoIcon size={34} />
         <div className="brand-name">
           AI Job Copilot
           <span>Career Agent</span>
         </div>
       </div>
 
+      {/* Nav links */}
       <nav className="sidebar-nav">
         <div className="sidebar-section-label">Navigation</div>
         {navItems.map((item) => (
@@ -57,6 +60,7 @@ export default function Sidebar() {
         ))}
       </nav>
 
+      {/* Footer */}
       <div className="sidebar-footer">
         {/* Credits bar */}
         {user && (

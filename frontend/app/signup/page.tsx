@@ -336,9 +336,33 @@ export default function SignupPage() {
         {/* Right — Brand / Info */}
         <div className="su-right">
           <a href="/" className="su-brand">
-            <div className="su-brand-icon">🤖</div>
-            <span className="su-brand-name">AI Job Copilot</span>
-          </a>
+          <svg width="42" height="42" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" style={{borderRadius:12,flexShrink:0}}>
+            <defs>
+                <linearGradient id="slg1" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#4f8aff"/>
+                <stop offset="100%" stopColor="#7c5cfc"/>
+              </linearGradient>
+            </defs>
+            <rect width="100" height="100" rx="22" fill="url(#slg1)"/>
+            <ellipse cx="38" cy="32" rx="22" ry="14" fill="white" fillOpacity="0.1"/>
+            <circle cx="50" cy="50" r="9" fill="white" fillOpacity="0.95"/>
+            <circle cx="50" cy="24" r="5.5" fill="white" fillOpacity="0.85"/>
+            <circle cx="72" cy="37" r="4.5" fill="white" fillOpacity="0.75"/>
+            <circle cx="72" cy="63" r="4.5" fill="white" fillOpacity="0.75"/>
+            <circle cx="50" cy="76" r="5.5" fill="white" fillOpacity="0.85"/>
+            <circle cx="28" cy="63" r="4.5" fill="white" fillOpacity="0.75"/>
+            <circle cx="28" cy="37" r="4.5" fill="white" fillOpacity="0.75"/>
+            <line x1="50" y1="41" x2="50" y2="29.5" stroke="white" strokeWidth="1.8" strokeOpacity="0.55"/>
+            <line x1="57.8" y1="44.5" x2="68.2" y2="40.2" stroke="white" strokeWidth="1.8" strokeOpacity="0.55"/>
+            <line x1="57.8" y1="55.5" x2="68.2" y2="59.8" stroke="white" strokeWidth="1.8" strokeOpacity="0.55"/>
+            <line x1="50" y1="59" x2="50" y2="70.5" stroke="white" strokeWidth="1.8" strokeOpacity="0.55"/>
+            <line x1="42.2" y1="55.5" x2="31.8" y2="59.8" stroke="white" strokeWidth="1.8" strokeOpacity="0.55"/>
+            <line x1="42.2" y1="44.5" x2="31.8" y2="40.2" stroke="white" strokeWidth="1.8" strokeOpacity="0.55"/>
+            <path d="M58 34 L66 34 L66 42" stroke="white" strokeWidth="2" strokeOpacity="0.7" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+            <line x1="56" y1="44" x2="65" y2="35" stroke="white" strokeWidth="2" strokeOpacity="0.7" strokeLinecap="round"/>
+          </svg>
+          <span className="su-brand-name">AI Job Copilot</span>
+        </a>
 
           <div className="su-headline">
             Your job search,<br />
