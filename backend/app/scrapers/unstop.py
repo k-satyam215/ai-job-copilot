@@ -1,5 +1,6 @@
-from app.scrapers.search_sources import fetch_search_jobs
+"""Unstop scraper disabled — JSearch API covers Unstop jobs with real URLs."""
 
 
-async def fetch_unstop_jobs(keyword: str, pages: int = 1) -> list[dict]:
-    return await fetch_search_jobs("unstop", "https://unstop.com/jobs?searchTerm={query}", keyword, pages)
+async def fetch_unstop_jobs(keyword: str = "software engineer", pages: int = 1) -> list[dict]:
+    """Disabled: JSearch API already fetches Unstop jobs with real apply URLs."""
+    return []

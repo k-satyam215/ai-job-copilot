@@ -128,11 +128,14 @@ class Settings(BaseSettings):
     whatsapp_phone_number_id: str | None = None
     whatsapp_verify_token: str | None = None
 
-    # ---------- Job Sources ----------
+    # ---------- Job Sources (API Keys) ----------
     job_scraper_timeout: int = 20
     job_scraper_concurrency: int = 6
     job_fetch_default_pages: int = 2
     job_quality_min_score: int = 40
+    jsearch_api_key: str | None = None          # RapidAPI JSearch — Naukri/LinkedIn/Indeed/Glassdoor
+    adzuna_app_id: str | None = None            # Adzuna free API — app_id
+    adzuna_app_key: str | None = None           # Adzuna free API — app_key
 
     # ---------- Observability ----------
     sentry_dsn: str | None = None

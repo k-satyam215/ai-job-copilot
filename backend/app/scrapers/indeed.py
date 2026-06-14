@@ -1,5 +1,6 @@
-from app.scrapers.search_sources import fetch_search_jobs
+"""Indeed scraper disabled — JSearch API covers Indeed jobs with real URLs."""
 
 
-async def fetch_indeed_jobs(keyword: str, pages: int = 1) -> list[dict]:
-    return await fetch_search_jobs("indeed", "https://in.indeed.com/jobs?q={query}", keyword, pages)
+async def fetch_indeed_jobs(keyword: str = "software engineer", pages: int = 1) -> list[dict]:
+    """Disabled: JSearch API already fetches Indeed jobs with real apply URLs."""
+    return []
